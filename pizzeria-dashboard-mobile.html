@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Dashboard Mobile - Pizzeria</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a2e;
+            color: white;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .header {
+            background: #e74c3c;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            background: #16213e;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .ordine-card {
+            background: #16213e;
+            padding: 15px;
+            border-radius: 8px;
+            border: 3px solid #e74c3c;
+            margin-bottom: 15px;
+        }
+
+        .ordine-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px dashed #666;
+        }
+
+        .ordine-numero {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .ordine-items {
+            margin: 15px 0;
+        }
+
+        .item {
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .item-nome {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .item-desc {
+            color: #aaa;
+            font-size: 0.9em;
+            margin: 3px 0;
+        }
+
+        .cliente-info {
+            background: #0f3460;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .totale {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: right;
+            padding: 10px;
+            background: #27ae60;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .btn-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-stampa {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-accetta {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-rifiuta {
+            background: #e74c3c;
+            color: white;
+            grid-column: 1 / -1;
+        }
+
+        .ordine-card.accepted {
+            border-color: #27ae60;
+            opacity: 0.7;
+        }
+
+        .ordine-card.rejected {
+            border-color: #7f8c8d;
+            opacity: 0.5;
+        }
+
+        @media print {
+            body {
+                background: white;
+                color: black;
+                padding: 0;
+            }
+
+            .ordine-card {
+                page-break-after: always;
+                border: none;
+            }
+
+            .btn-container {
+                display: none;
+            }
+
+            .header {
+                display: none;
+            }
+
+            .stats {
+                display: none;
+            }
+        }
+
+        /* Stile per lo scontrino */
+        .print-only {
+            display: none;
+        }
+
+        @media print {
+            .print-only {
+                display: block;
+            }
+
+            .no-print {
+                display: none;
+            }
+        }
+
+        .badge-nuovo {
+            background: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .modifica-orario {
+            background: #0f3460;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .modifica-orario input {
+            background: #16213e;
+            color: white;
+            border: 2px solid #3498db;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 1em;
+            width: 100%;
+        }
+
+        /* Stile stampa ottimizzato */
+        @media print {
+            * { 
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                background: white !important;
+                color: black !important;
+            }
+            
+            @page {
+                size: 80mm auto;
+                margin: 5mm;
+            }
+            
+            body {
+                background: white !important;
+                color: black !important;
+                font-size: 42px;
+                line-height: 1.6;
+                font-family: 'Courier New', monospace;
+            }
+            
+            .ordine-card {
+                background: white !important;
+                border: none !important;
+                padding: 10px !important;
+                page-break-after: always;
+                color: black !important;
+            }
+            
+            .ordine-card * {
+                background: white !important;
+                color: black !important;
+            }
+            
+            .print-only {
+                display: block !important;
+                background: white !important;
+                color: black !important;
+            }
+            
+            .print-row {
+                display: block !important;
+                margin: 8px 0 !important;
+                padding: 5px 0 !important;
+                border-bottom: 1px solid #ddd !important;
+                background: white !important;
+                color: black !important;
+            }
+            
+            .print-label {
+                font-weight: bold !important;
+                display: block !important;
+                margin-bottom: 3px !important;
+                color: black !important;
+                background: white !important;
+                font-size: 42px !important;
+            }
+            
+            .print-value {
+                display: block !important;
+                margin-left: 10px !important;
+                color: black !important;
+                background: white !important;
+                font-size: 42px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header no-print">
+        <h1>🍕 Dashboard Pizzeria</h1>
+        <div style="font-size: 0.9em; margin-top: 5px;">
+            IP Server: <span id="server-ip"></span>
+        </div>
+    </div>
+
+    <div class="stats no-print">
+        <div class="stat-card" onclick="toggleTuttiOrdini(false)" style="cursor: pointer; border: 2px solid #e74c3c;">
+            <div class="stat-number" id="ordini-nuovi" style="color: #e74c3c;">0</div>
+            <div>Nuovi</div>
+            <div style="font-size: 0.7em; margin-top: 5px; color: #e74c3c;">📥 Ordini in attesa</div>
+        </div>
+        <div class="stat-card" onclick="toggleTuttiOrdini(true)" style="cursor: pointer; border: 2px solid #3498db;">
+            <div class="stat-number" id="ordini-totali" style="color: #3498db;">0</div>
+            <div>Totali Oggi</div>
+            <div style="font-size: 0.7em; margin-top: 5px; color: #3498db;" id="toggle-text">👁️ Tutti gli ordini</div>
+        </div>
+    </div>
+
+    <div id="ordini-container"></div>
+
+    <!-- Audio notifica -->
+    <audio id="notifica-sound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAoUXrTp66hVFApGn+DyvmwhBjiP1vHMeS0GI3bH8N2RQAo=" type="audio/wav">
+    </audio>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Configurazione automatica
+        const serverUrl = window.location.origin;
+        document.getElementById('server-ip').textContent = window.location.host;
+
+        const socket = io();
+        let ordini = [];
+        let mostraTuttiOrdini = false;
+        const notificaSound = document.getElementById('notifica-sound');
+
+        socket.on('connect', () => {
+            console.log('✅ Connesso al server:', serverUrl);
+            document.getElementById('server-ip').style.color = '#2ecc71';
+            caricaOrdini();
+        });
+
+        socket.on('disconnect', () => {
+            console.log('❌ Disconnesso dal server');
+            document.getElementById('server-ip').style.color = '#e74c3c';
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error('❌ Errore connessione Socket.io:', error);
+            document.getElementById('server-ip').style.color = '#e74c3c';
+        });
+
+        socket.on('nuovo-ordine', (ordine) => {
+            console.log('Nuovo ordine ricevuto:', ordine);
+            ordini.unshift(ordine);
+            aggiornaUI();
+            
+            // Notifica sonora
+            notificaSound.play().catch(e => console.log('Errore audio:', e));
+            
+            // Vibrazione (se supportata)
+            if ('vibrate' in navigator) {
+                navigator.vibrate([200, 100, 200]);
+            }
+        });
+
+        socket.on('ordine-aggiornato', (ordine) => {
+            const index = ordini.findIndex(o => o.id === ordine.id);
+            if (index !== -1) {
+                ordini[index] = ordine;
+                aggiornaUI();
+            }
+        });
+
+        async function caricaOrdini() {
+            try {
+                console.log('🔄 Caricamento ordini da:', serverUrl + '/api/ordini');
+                const response = await fetch(serverUrl + '/api/ordini');
+                console.log('📡 Risposta ricevuta, status:', response.status);
+                ordini = await response.json();
+                console.log('📦 Ordini caricati:', ordini.length);
+                aggiornaUI();
+            } catch (error) {
+                console.error('❌ Errore caricamento ordini:', error);
+                document.getElementById('ordini-container').innerHTML = 
+                    '<div style="padding: 20px; color: #e74c3c; text-align: center;">' +
+                    '<h3>⚠️ Errore Connessione</h3>' +
+                    '<p>' + error.message + '</p>' +
+                    '<p>Server: ' + serverUrl + '</p>' +
+                    '</div>';
+            }
+        }
+
+        function toggleTuttiOrdini(visualizzaTutti) {
+            // Se visualizzaTutti è undefined, fai toggle
+            if (visualizzaTutti === undefined) {
+                mostraTuttiOrdini = !mostraTuttiOrdini;
+            } else {
+                mostraTuttiOrdini = visualizzaTutti;
+            }
+            
+            const toggleText = document.getElementById('toggle-text');
+            
+            if (mostraTuttiOrdini) {
+                toggleText.textContent = '👁️ Tutti gli ordini';
+            } else {
+                toggleText.textContent = '👁️ Tutti gli ordini';
+            }
+            
+            aggiornaUI();
+        }
+
+        function aggiornaUI() {
+            const container = document.getElementById('ordini-container');
+            const nuovi = ordini.filter(o => o.stato === 'pending').length;
+            
+            console.log('Aggiornamento UI:', ordini.length, 'ordini totali');
+            console.log('Ordini:', ordini);
+            
+            document.getElementById('ordini-nuovi').textContent = nuovi;
+            document.getElementById('ordini-totali').textContent = ordini.length;
+
+            let ordiniDaMostrare;
+            
+            if (mostraTuttiOrdini) {
+                // Mostra tutti gli ordini del giorno (escludi solo rejected)
+                ordiniDaMostrare = ordini.filter(o => o.stato !== 'rejected');
+            } else {
+                // Modalità normale: solo pending e accepted recenti
+                const now = new Date().getTime();
+                ordiniDaMostrare = ordini.filter(o => {
+                    if (o.stato === 'pending') return true;
+                    if (o.stato === 'accepted') {
+                        const dataRif = o.timestamp_accettato ? new Date(o.timestamp_accettato).getTime() : new Date(o.data_ordine).getTime();
+                        return (now - dataRif) < 60000; // 1 minuto
+                    }
+                    return false;
+                });
+            }
+
+            console.log('Ordini da mostrare:', ordiniDaMostrare.length);
+
+            if (ordiniDaMostrare.length === 0) {
+                container.innerHTML = '<div class="no-print" style="text-align: center; padding: 40px; color: #666;">Nessun ordine in attesa</div>';
+                return;
+            }
+
+            container.innerHTML = ordiniDaMostrare.map(ordine => {
+                // Parse items se è una stringa, altrimenti usa direttamente
+                const items = typeof ordine.items === 'string' ? JSON.parse(ordine.items) : ordine.items;
+                
+                return `
+                <div class="ordine-card ${ordine.stato === 'accepted' ? 'accepted' : ''} ${ordine.stato === 'rejected' ? 'rejected' : ''}" id="ordine-${ordine.id}">
+                    <!-- Info per schermo -->
+                    <div class="ordine-header no-print">
+                        <div>
+                            <div class="ordine-numero">#${ordine.numero_ordine}</div>
+                            <div style="font-size: 0.8em; color: #aaa;">${new Date(ordine.data_ordine).toLocaleTimeString('it-IT')}</div>
+                        </div>
+                        ${ordine.stato === 'pending' ? '<span class="badge-nuovo">NUOVO</span>' : ''}
+                        ${ordine.stato === 'accepted' ? '<span style="color: #27ae60; font-weight: bold;">✓ ACCETTATO</span>' : ''}
+                    </div>
+
+                    <!-- Info per stampa -->
+                    <div class="print-only" style="text-align: center; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 15px; background: white !important;">
+                        <div style="font-size: 20px; font-weight: bold; color: black !important;">ORDINE #${ordine.numero_ordine}</div>
+                        <div style="font-size: 12px; color: black !important;">${new Date(ordine.data_ordine).toLocaleString('it-IT')}</div>
+                    </div>
+
+                    <!-- Info cliente per stampa -->
+                    <div class="print-only">
+                        <div class="print-row">
+                            <span class="print-label">TIPO:</span>
+                            <span class="print-value">${ordine.tipo_ordine === 'consegna' ? '🚗 CONSEGNA A DOMICILIO' : '🏪 RITIRO AL BANCO'}</span>
+                        </div>
+                        <div class="print-row">
+                            <span class="print-label">NOME - COGNOME:</span>
+                            <span class="print-value">${ordine.cliente_nome}</span>
+                        </div>
+                        <div class="print-row">
+                            <span class="print-label">TELEFONO:</span>
+                            <span class="print-value">${ordine.cliente_telefono}</span>
+                        </div>
+                        ${ordine.tipo_ordine === 'consegna' ? `
+                        <div class="print-row">
+                            <span class="print-label">INDIRIZZO:</span>
+                            <span class="print-value">${ordine.cliente_indirizzo}</span>
+                        </div>
+                        ` : ''}
+                        <div class="print-row">
+                            <span class="print-label">ORARIO:</span>
+                            <span class="print-value" style="font-size: 16px; font-weight: bold;">${ordine.orario_confermato || ordine.orario_richiesto || 'IMMEDIATO'}</span>
+                        </div>
+                        ${ordine.tipo_ordine === 'consegna' ? `
+                        <div class="print-row">
+                            <span class="print-label">PAGAMENTO:</span>
+                            <span class="print-value">${ordine.metodo_pagamento === 'contanti' ? '💵 CONTANTI' : '💳 CARTA'}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Info cliente per schermo -->
+                    <div class="cliente-info no-print">
+                        <div><strong>👤 ${ordine.cliente_nome}</strong></div>
+                        <div>📞 ${ordine.cliente_telefono}</div>
+                        <div style="color: ${ordine.tipo_ordine === 'consegna' ? '#e74c3c' : '#27ae60'}; font-weight: bold;">
+                            ${ordine.tipo_ordine === 'consegna' ? '🚗 CONSEGNA' : '🏪 RITIRO AL BANCO'}
+                        </div>
+                        ${ordine.cliente_indirizzo && ordine.tipo_ordine === 'consegna' ? `<div>📍 ${ordine.cliente_indirizzo}</div>` : ''}
+                        ${ordine.tipo_ordine === 'consegna' ? `<div>💰 ${ordine.metodo_pagamento === 'contanti' ? 'CONTANTI' : 'CARTA'}</div>` : ''}
+                        ${ordine.note ? `<div style="margin-top: 5px; color: #f39c12;">📝 ${ordine.note}</div>` : ''}
+                    </div>
+
+                    ${ordine.stato === 'pending' ? `
+                    <div class="modifica-orario no-print">
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">🕐 Imposta Orario Consegna:</label>
+                        <input type="time" id="orario-${ordine.id}" value="${ordine.orario_richiesto || ''}">
+                    </div>
+                    ` : ''}
+
+                    <!-- Lista pizze -->
+                    <div class="ordine-items">
+                        <div class="print-only" style="font-weight: bold; border-bottom: 2px solid black; border-top: 2px solid black; padding: 8px 0; margin: 15px 0; text-align: center; background: white !important; color: black !important;">PIZZE ORDINATE</div>
+                        ${items.map((item, idx) => `
+                            <div class="item">
+                                <div class="no-print" style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div style="flex: 1;">
+                                        <div class="item-nome">${item.nome}</div>
+                                        ${item.descrizione ? `<div class="item-desc">${item.descrizione}</div>` : ''}
+                                    </div>
+                                    <div style="color: #27ae60; font-weight: bold; margin-left: 10px;">€ ${item.prezzo.toFixed(2)}</div>
+                                </div>
+                                <div class="print-only print-row" style="background: white !important;">
+                                    <span class="print-value" style="font-size: 15px;">${item.nome}</span>
+                                    ${item.descrizione && item.personalizzata ? `<span class="print-value" style="font-size: 12px; color: #666 !important; margin-top: 3px; display: block;">${item.descrizione}</span>` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="totale">
+                        <div class="no-print">TOTALE: € ${parseFloat(ordine.totale).toFixed(2)}</div>
+                        <div class="print-only print-row" style="margin-top: 15px; padding-top: 10px; border-top: 2px solid black;">
+                            <span class="print-label">TOTALE:</span>
+                            <span class="print-value" style="font-size: 18px; font-weight: bold;">€ ${parseFloat(ordine.totale).toFixed(2)}</span>
+                        </div>
+                    </div>
+
+                    ${ordine.stato === 'pending' ? `
+                        <div class="btn-container">
+                            <button class="btn btn-stampa" onclick="stampaOrdine(${ordine.id})">
+                                🖨️ STAMPA
+                            </button>
+                            <button class="btn btn-accetta" onclick="accettaOrdine(${ordine.id})">
+                                ✓ ACCETTA
+                            </button>
+                            <button class="btn btn-rifiuta" onclick="rifiutaOrdine(${ordine.id})">
+                                ✕ RIFIUTA
+                            </button>
+                        </div>
+                    ` : ''}
+                    
+                    ${ordine.stato === 'accepted' ? `
+                        <div class="btn-container">
+                            <button class="btn btn-stampa" onclick="stampaOrdine(${ordine.id})" style="grid-column: 1 / -1;">
+                                🖨️ RISTAMPA
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            }).join('');
+        }
+
+        async function accettaOrdine(ordineId) {
+            try {
+                // Prendi l'orario impostato
+                const orarioInput = document.getElementById('orario-' + ordineId);
+                const orarioConfermato = orarioInput ? orarioInput.value : null;
+                
+                if (!orarioConfermato) {
+                    alert('⚠️ Imposta un orario di consegna prima di accettare!');
+                    return;
+                }
+                
+                // Accetta l'ordine
+                const response = await fetch(serverUrl + '/api/ordini/' + ordineId + '/accetta', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        orario_confermato: orarioConfermato
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    // Aggiorna l'ordine nella lista locale con timestamp di accettazione
+                    const index = ordini.findIndex(o => o.id === ordineId);
+                    if (index !== -1) {
+                        ordini[index].stato = 'accepted';
+                        ordini[index].orario_confermato = orarioConfermato;
+                        ordini[index].timestamp_accettato = new Date().toISOString();
+                        aggiornaUI();
+                    }
+                }
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        }
+
+        async function rifiutaOrdine(ordineId) {
+            if (!confirm('Sei sicuro di voler rifiutare questo ordine?')) return;
+            
+            try {
+                const response = await fetch(serverUrl + '/api/ordini/' + ordineId + '/rifiuta', {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                if (result.success) {
+                    // Ricarica ordini per aggiornare la vista
+                    await caricaOrdini();
+                }
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        }
+
+        function stampaOrdine(ordineId) {
+            console.log('Stampa ordine:', ordineId);
+            
+            // Trova la card dell'ordine
+            let ordineCard = document.getElementById('ordine-' + ordineId);
+            
+            // Se non esiste, forza il refresh della UI
+            if (!ordineCard) {
+                console.log('Card non trovata, forzo aggiornamento UI');
+                aggiornaUI();
+                // Aspetta che la UI si aggiorni
+                setTimeout(() => {
+                    ordineCard = document.getElementById('ordine-' + ordineId);
+                    if (!ordineCard) {
+                        alert('⚠️ Impossibile stampare. Prova con il tasto STAMPA.');
+                        return;
+                    }
+                    eseguiStampa(ordineId, ordineCard);
+                }, 500);
+                return;
+            }
+            
+            eseguiStampa(ordineId, ordineCard);
+        }
+        
+        function eseguiStampa(ordineId, ordineCard) {
+            console.log('Eseguo stampa per card:', ordineCard);
+            
+            // Assicurati che la card sia visibile
+            ordineCard.style.display = 'block';
+            ordineCard.style.visibility = 'visible';
+            
+            // Se l'ordine è pending, aggiorna l'orario per la stampa
+            const ordine = ordini.find(o => o.id === ordineId);
+            if (ordine && ordine.stato === 'pending') {
+                const orarioInput = document.getElementById('orario-' + ordineId);
+                if (orarioInput && orarioInput.value) {
+                    // Trova tutti gli elementi con l'orario e aggiornali temporaneamente
+                    const elementiOrario = ordineCard.querySelectorAll('.print-value');
+                    elementiOrario.forEach(el => {
+                        if (el.textContent.includes('IMMEDIATO') || el.textContent.includes('RICHIESTO') || el.parentElement.querySelector('.print-label')?.textContent.includes('ORARIO')) {
+                            el.setAttribute('data-original', el.textContent);
+                            el.textContent = orarioInput.value;
+                        }
+                    });
+                }
+            }
+            
+            // Nascondi header e stats
+            const header = document.querySelector('.header');
+            const stats = document.querySelector('.stats');
+            if (header) header.style.display = 'none';
+            if (stats) stats.style.display = 'none';
+            
+            // Nascondi tutti gli altri ordini
+            const allCards = document.querySelectorAll('.ordine-card');
+            allCards.forEach(card => {
+                if (card.id !== 'ordine-' + ordineId) {
+                    card.style.display = 'none';
+                }
+            });
+            
+            console.log('Apertura finestra di stampa...');
+            
+            // Stampa
+            setTimeout(() => {
+                window.print();
+                
+                // Ripristina tutto dopo la stampa
+                setTimeout(() => {
+                    // Ripristina orari
+                    const elementiOrario = ordineCard.querySelectorAll('.print-value[data-original]');
+                    elementiOrario.forEach(el => {
+                        el.textContent = el.getAttribute('data-original');
+                        el.removeAttribute('data-original');
+                    });
+                    
+                    // Mostra tutto
+                    if (header) header.style.display = '';
+                    if (stats) stats.style.display = '';
+                    allCards.forEach(card => card.style.display = '');
+                }, 1000);
+            }, 200);
+        }
+
+        // Auto-refresh ogni 30 secondi
+        setInterval(caricaOrdini, 30000);
+    </script>
+</body>
+</html>

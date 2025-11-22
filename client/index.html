@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizzeria - Ordina Online</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #e74c3c;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .menu-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .categoria-title {
+            color: #e74c3c;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 10px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .menu-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            border-color: #e74c3c;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-componi {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+            transition: transform 0.3s;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .btn-componi:hover {
+            transform: scale(1.05);
+        }
+
+        .menu-item.selected {
+            border-color: #27ae60;
+            background: #d5f4e6;
+        }
+
+        .item-name {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .item-desc {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+            min-height: 40px;
+        }
+
+        .item-price {
+            font-size: 1.3em;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .carrello-fixed {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            padding: 20px 30px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            z-index: 1000;
+            transition: transform 0.3s;
+        }
+
+        .carrello-fixed:hover {
+            transform: scale(1.1);
+        }
+
+        .carrello-badge {
+            background: white;
+            color: #e74c3c;
+            border-radius: 50%;
+            padding: 5px 10px;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close-modal:hover {
+            color: #e74c3c;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #e74c3c;
+        }
+
+        .carrello-lista {
+            margin-bottom: 20px;
+        }
+
+        .carrello-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+
+        .carrello-item-nome {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .carrello-item-prezzo {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .totale {
+            text-align: right;
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 8px;
+        }
+
+        .btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #c0392b;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .ingredienti-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .ingredienti-section h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .ingrediente-item {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+        }
+
+        .ingrediente-item:hover {
+            border-color: #e74c3c;
+        }
+
+        .ingrediente-item.selected {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+
+        .ingrediente-item.aggiungi.selected {
+            background: #27ae60;
+            border-color: #27ae60;
+        }
+
+        .modal-pizza {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .pizza-customizer {
+            margin: 20px 0;
+        }
+
+        .customizer-summary {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            margin-top: 10px;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .btn-remove {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .carrello-fixed {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍕 Pizzeria Mamma Mia</h1>
+            <p class="subtitle">Ordina le nostre deliziose pizze online!</p>
+        </header>
+
+        <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap;">
+            <button class="btn" style="width: auto; padding: 15px 40px; font-size: 1.2em; background: linear-gradient(135deg, #e74c3c, #c0392b);" onclick="mostraMenuCompleto()">
+                📋 Scegli dal Nostro Menu
+            </button>
+            <button class="btn" style="width: auto; padding: 15px 40px; font-size: 1.2em; background: linear-gradient(135deg, #f39c12, #e67e22);" onclick="componituaPizza()">
+                👨‍🍳 Componi la Tua Pizza
+            </button>
+        </div>
+
+        <div id="menu-container"></div>
+    </div>
+
+    <div class="carrello-fixed" onclick="apriCarrello()">
+        🛒 Carrello <span class="carrello-badge" id="carrello-count">0</span>
+    </div>
+
+    <div id="modal-carrello" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="chiudiCarrello()">&times;</span>
+            <h2 style="color: #e74c3c; margin-bottom: 20px;">Il Tuo Ordine</h2>
+            
+            <div id="carrello-contenuto"></div>
+
+            <div class="form-group">
+                <label>Nome e Cognome *</label>
+                <input type="text" id="cliente-nome" placeholder="Mario Rossi" required>
+            </div>
+
+            <div class="form-group">
+                <label>Telefono *</label>
+                <input type="tel" id="cliente-telefono" placeholder="333 1234567" required>
+            </div>
+
+            <div class="form-group">
+                <label>Indirizzo (per consegna a domicilio)</label>
+                <input type="text" id="cliente-indirizzo" placeholder="Via Roma 123, Milano">
+            </div>
+
+            <div class="form-group">
+                <label>Tipo Ordine *</label>
+                <select id="tipo-ordine" onchange="aggiornaTipoOrdine()" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em;">
+                    <option value="ritiro">Ritiro al banco</option>
+                    <option value="consegna">Consegna a domicilio (+€2.00)</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="metodo-pagamento-group" style="display: none;">
+                <label>Metodo di Pagamento *</label>
+                <select id="metodo-pagamento" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em;">
+                    <option value="contanti">Contanti</option>
+                    <option value="carta">Carta</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Orario Preferito</label>
+                <input type="time" id="orario-richiesto">
+            </div>
+
+            <div class="form-group">
+                <label>Note</label>
+                <textarea id="note" rows="3" placeholder="Note aggiuntive per l'ordine..."></textarea>
+            </div>
+
+            <button class="btn" onclick="inviaOrdine()">Invia Ordine</button>
+        </div>
+    </div>
+
+    <!-- Modal Personalizza Pizza -->
+    <div id="modal-personalizza" class="modal">
+        <div class="modal-content modal-pizza">
+            <span class="close-modal" onclick="chiudiPersonalizza()">&times;</span>
+            <div id="personalizza-contenuto"></div>
+        </div>
+    </div>
+
+    <!-- Modal Componi Pizza -->
+    <div id="modal-componi" class="modal">
+        <div class="modal-content modal-pizza">
+            <span class="close-modal" onclick="chiudiComponi()">&times;</span>
+            <h2 style="color: #e74c3c; margin-bottom: 20px;">👨‍🍳 Componi la Tua Pizza</h2>
+            
+            <div class="form-group">
+                <label>Nome della tua pizza</label>
+                <input type="text" id="nome-custom" placeholder="La Mia Pizza Speciale" value="Pizza Personalizzata">
+            </div>
+
+            <div class="ingredienti-section">
+                <h4>🧀 Base (seleziona una)</h4>
+                <div id="base-ingredienti"></div>
+            </div>
+
+            <div class="ingredienti-section">
+                <h4>✨ Ingredienti Aggiuntivi €1.50</h4>
+                <div id="custom-ingredienti-1"></div>
+            </div>
+
+            <div class="ingredienti-section">
+                <h4>✨ Ingredienti Aggiuntivi €2.50</h4>
+                <div id="custom-ingredienti-2"></div>
+            </div>
+
+            <div class="ingredienti-section">
+                <h4>✨ Ingredienti Aggiuntivi €3.50</h4>
+                <div id="custom-ingredienti-3"></div>
+            </div>
+
+            <div class="ingredienti-section">
+                <h4>✨ Ingredienti Aggiuntivi €7.00</h4>
+                <div id="custom-ingredienti-7"></div>
+            </div>
+
+            <div class="customizer-summary">
+                <strong>Prezzo Totale: € <span id="prezzo-custom">0.00</span></strong>
+            </div>
+
+            <button class="btn btn-success" onclick="aggiungiPizzaCustom()">Aggiungi al Carrello</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io('http://localhost:3000');
+        let menu = [];
+        let carrello = [];
+
+        // Definizione ingredienti
+        const ingredientiBase = [
+            { nome: 'Bianca', prezzo: 5.50 },
+            { nome: 'Rossa', prezzo: 5.00 },
+            { nome: 'Margherita', prezzo: 6.00 },
+            { nome: 'Saltinbocca', prezzo: 5.50 }
+        ];
+
+        const ingredientiExtra = [
+            // 1.50€
+            { nome: 'Capperi', prezzo: 1.50 },
+            { nome: 'Cipolle', prezzo: 1.50 },
+            { nome: 'Funghi', prezzo: 1.50 },
+            { nome: 'Melanzane', prezzo: 1.50 },
+            { nome: 'Olive', prezzo: 1.50 },
+            { nome: 'Patatine Fritte', prezzo: 1.50 },
+            { nome: 'Peperoni', prezzo: 1.50 },
+            { nome: 'Zucchine', prezzo: 1.50 },
+            { nome: 'Wurstel', prezzo: 1.50 },
+            { nome: 'Olio all\'aglio', prezzo: 1.50 },
+            // 2.50€
+            { nome: 'Pomodori', prezzo: 2.50 },
+            { nome: 'Carciofi', prezzo: 2.50 },
+            { nome: 'Pomodorini', prezzo: 2.50 },
+            { nome: 'Rucola', prezzo: 2.50 },
+            { nome: 'Prosciutto Cotto', prezzo: 2.50 },
+            { nome: 'Salsiccia', prezzo: 2.50 },
+            { nome: 'Emmental', prezzo: 2.50 },
+            { nome: 'Gorgonzola', prezzo: 2.50 },
+            { nome: 'Grana', prezzo: 2.50 },
+            { nome: 'Mozzarella', prezzo: 2.50 },
+            { nome: 'Philadelphia', prezzo: 2.50 },
+            { nome: 'Ricotta', prezzo: 2.50 },
+            { nome: 'Scamorza', prezzo: 2.50 },
+            { nome: 'Acciughe', prezzo: 2.50 },
+            { nome: 'Tonno', prezzo: 2.50 },
+            // 3.50€
+            { nome: 'Porcini', prezzo: 3.50 },
+            { nome: 'Pere', prezzo: 3.50 },
+            { nome: 'Tartufo Fresco', prezzo: 3.50 },
+            { nome: 'Bresaola', prezzo: 3.50 },
+            { nome: 'Prosciutto Crudo', prezzo: 3.50 },
+            { nome: 'Salame Dolce', prezzo: 3.50 },
+            { nome: 'Speck', prezzo: 3.50 },
+            { nome: 'Bufala', prezzo: 3.50 },
+            { nome: 'Stracciatella', prezzo: 3.50 },
+            { nome: 'Pancetta', prezzo: 3.50 },
+            { nome: 'Salame Piccante', prezzo: 3.50 },
+            // 7.00€
+            { nome: 'Frutti di Mare (prodotto congelato)', prezzo: 7.00 },
+            { nome: 'Salmone (prodotto congelato)', prezzo: 7.00 },
+            { nome: 'Gamberetti (prodotto congelato)', prezzo: 7.00 }
+        ];
+
+        // Mappa ingredienti per pizza (per rimozione)
+        const pizzaIngredienti = {
+            'Focaccia': ['Olio', 'Sale'],
+            'Margherita': ['Pomodoro', 'Mozzarella'],
+            'Marinara': ['Pomodoro', 'Aglio', 'Origano'],
+            'Napoli': ['Pomodoro', 'Mozzarella', 'Acciughe', 'Origano'],
+            'Quattro Stagioni': ['Pomodoro', 'Mozzarella', 'Prosciutto Cotto', 'Funghi', 'Carciofi'],
+            'Romana': ['Pomodoro', 'Mozzarella', 'Acciughe', 'Capperi', 'Origano'],
+            'Schiacciatina': ['Pomodoro', 'Prosciutto Cotto'],
+            'Funghi': ['Pomodoro', 'Mozzarella', 'Funghi'],
+            'Pugliese': ['Pomodoro', 'Mozzarella', 'Cipolla'],
+            'Prosciutto cotto e funghi': ['Pomodoro', 'Mozzarella', 'Prosciutto Cotto', 'Funghi'],
+            'Appetitosa': ['Mozzarella', 'Prosciutto Cotto', 'Funghi', 'Grana'],
+            'Diavola': ['Pomodoro', 'Mozzarella', 'Salame Piccante'],
+            'Primavera': ['Mozzarella', 'Prosciutto Cotto', 'Olive', 'Pomodorini', 'Insalata'],
+            'Bufala': ['Pomodoro', 'Mozzarella di Bufala'],
+            'Tonno e cipolle': ['Pomodoro', 'Mozzarella', 'Tonno', 'Cipolla'],
+            'Vegetariana': ['Pomodoro', 'Mozzarella', 'Melanzane', 'Peperoni', 'Zucchine'],
+            'Caprese': ['Pomodoro', 'Mozzarella di Bufala', 'Pomodorini'],
+            'Rucola': ['Pomodoro', 'Mozzarella di Bufala', 'Rucola'],
+            'Tonno': ['Pomodoro', 'Mozzarella', 'Tonno'],
+            'Carciofi': ['Pomodoro', 'Mozzarella', 'Carciofi'],
+            'Prosciutto cotto': ['Pomodoro', 'Mozzarella', 'Prosciutto Cotto'],
+            'Wurstel': ['Pomodoro', 'Mozzarella', 'Wurstel'],
+            'Siciliana': ['Pomodoro', 'Acciughe', 'Capperi', 'Olive', 'Origano'],
+            'Gorgonzola': ['Pomodoro', 'Mozzarella', 'Gorgonzola'],
+            'Salsiccia': ['Pomodoro', 'Mozzarella', 'Salsiccia'],
+            'Capricciosa': ['Pomodoro', 'Mozzarella', 'Prosciutto Cotto', 'Funghi', 'Carciofi'],
+            'Calzone normale': ['Pomodoro', 'Mozzarella', 'Prosciutto Cotto'],
+            '4 Formaggi': ['Pomodoro', 'Mozzarella', 'Gorgonzola', 'Fontina', 'Taleggio'],
+            'Peperoni': ['Pomodoro', 'Mozzarella', 'Peperoni'],
+            'Calzone farcito': ['Pomodoro', 'Mozzarella', 'Prosciutto Cotto', 'Funghi', 'Carciofi'],
+            'Snoopy': ['Pomodoro', 'Mozzarella', 'Patatine Fritte'],
+            'Prosciutto crudo': ['Pomodoro', 'Mozzarella', 'Prosciutto Crudo'],
+            'Patatine e wurstel': ['Pomodoro', 'Mozzarella', 'Patatine Fritte', 'Wurstel'],
+            // Pizze Speciali
+            'Sirena': ['Mozzarella', 'Pomodori Datterini Gialli', 'Grana', 'Basilico', 'Crema di Pomodoro'],
+            'Boh?': ['Mozzarella', 'Pomodori Secchi', 'Peperoni', 'Salsiccia', 'Limone', 'Menta'],
+            'Mamma mia': ['Pomodoro', 'Mozzarella', 'Scamorza', 'Funghi', 'Carciofi', 'Prosciutto Cotto', 'Peperoni', 'Olive', 'Wurstel', 'Salsiccia', 'Patatine Fritte'],
+            'Zola noci e pere': ['Mozzarella', 'Gorgonzola', 'Noci', 'Pere'],
+            'Pollo e patate': ['Mozzarella', 'Patate', 'Rosmarino', 'Pancetta'],
+            'Focaccia del corsaro': ['Pomodorini', 'Tonno', 'Gamberetti', 'Bufala', 'Rucola', 'Prosciutto Crudo', 'Sale', 'Olio', 'Origano'],
+            'Frutti di mare': ['Pomodoro', 'Mozzarella', 'Frutti di Mare', 'Olive', 'Origano'],
+            'Barchetta': ['Pomodoro', 'Mozzarella', 'Cipolla', 'Peperoni', 'Melanzane', 'Zucchine'],
+            'Vulcano': ['Mozzarella', 'Pomodorini', 'Nduja', 'Ricotta'],
+            'Margherita e tartufo': ['Mozzarella', 'Pomodoro', 'Tartufo'],
+            'Culatello': ['Mozzarella', 'Culatello', 'Rucola', 'Grana'],
+            'Contadina': ['Pomodoro', 'Mozzarella', 'Salsiccia', 'Funghi'],
+            'Della vecchietta': ['Mozzarella', 'Gorgonzola', 'Radicchio', 'Speck'],
+            'Carbonara': ['Mozzarella', 'Uova', 'Pancetta', 'Pecorino', 'Pepe Nero'],
+            'Contadina 2': ['Pomodoro', 'Mozzarella', 'Salsiccia', 'Peperoni'],
+            'Rustica': ['Pomodoro', 'Mozzarella', 'Salsiccia', 'Patatine Fritte'],
+            'Crudo e funghi': ['Pomodoro', 'Mozzarella', 'Prosciutto Crudo', 'Funghi Porcini'],
+            'Bismarck': ['Pomodoro', 'Mozzarella', 'Prosciutto Cotto', 'Uovo'],
+            'Diavola e patatine': ['Pomodoro', 'Mozzarella', 'Salame Piccante', 'Patatine Fritte'],
+            'Profumo di venere': ['Mozzarella', 'Pomodori Secchi', 'Tonno', 'Pancetta', 'Grana'],
+            'Sfiziosa': ['Mozzarella', 'Carciofini', 'Pomodori Secchi', 'Bresaola', 'Rucola', 'Grana'],
+            'Golden Rita': ['Pomodorini Gialli', 'Mozzarella', 'Pepe Nero', 'Cacio Ricotta', 'Basilico'],
+            'Nutella': ['Pane', 'Nutella'],
+            'Tre pomodori': ['Pomodoro', 'Pomodorini Rossi', 'Pomodorini Gialli', 'Aglio', 'Olio', 'Origano', 'Burrata'],
+            'Funghi porcini': ['Pomodoro', 'Mozzarella', 'Funghi Porcini'],
+            'Salsiccia e broccoli': ['Mozzarella', 'Salsiccia', 'Friarielli'],
+            'Gamberetti e rucola': ['Pomodoro', 'Mozzarella', 'Gamberetti', 'Rucola'],
+            'Pancetta e rucola': ['Pomodoro', 'Mozzarella', 'Pancetta', 'Rucola'],
+            'Melanzana': ['Pomodoro', 'Mozzarella', 'Melanzane'],
+            // Mezze Metro
+            'Mezzo Metro - Margherita': ['Pomodoro', 'Mozzarella'],
+            'Mezzo Metro - Margherita + Misto': [],
+            'Mezzo Metro - Qualsiasi gusto': []
+        };
+
+        // Carica menu
+        async function caricaMenu() {
+            try {
+                const response = await fetch('http://localhost:3000/api/menu');
+                menu = await response.json();
+                // Non mostrare subito il menu, aspetta che l'utente clicchi
+            } catch (error) {
+                console.error('Errore caricamento menu:', error);
+            }
+        }
+
+        function mostraMenuCompleto() {
+            console.log('Menu array:', menu); // Debug
+            
+            if (!menu || menu.length === 0) {
+                alert('Caricamento menu in corso... Riprova tra un momento.');
+                return;
+            }
+            
+            const container = document.getElementById('menu-container');
+            const categorie = [...new Set(menu.map(item => item.categoria))];
+
+            container.innerHTML = '';
+
+            categorie.forEach(categoria => {
+                const items = menu.filter(item => item.categoria === categoria);
+                
+                const section = document.createElement('div');
+                section.className = 'menu-section';
+                section.innerHTML = `
+                    <h2 class="categoria-title">${categoria}</h2>
+                    <div class="menu-grid">
+                        ${items.map(item => `
+                            <div class="menu-item" onclick="selezionaPizza(${item.id})">
+                                <div class="item-name">${item.nome}</div>
+                                <div class="item-desc">${item.descrizione || ''}</div>
+                                <div class="item-price">€ ${item.prezzo.toFixed(2)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(section);
+            });
+
+            // Scroll al menu
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function selezionaPizza(itemId) {
+            const item = menu.find(m => m.id === itemId);
+            if (!item) return;
+
+            // Se è una bevanda, aggiungi direttamente
+            if (item.categoria === 'Bevande') {
+                aggiungiAlCarrello(item);
+                return;
+            }
+
+            // Altrimenti mostra modal personalizzazione
+            mostraPersonalizzaPizza(item);
+        }
+
+        function mostraPersonalizzaPizza(pizza) {
+            const modal = document.getElementById('modal-personalizza');
+            const contenuto = document.getElementById('personalizza-contenuto');
+
+            const ingredientiPizza = pizzaIngredienti[pizza.nome] || [];
+            
+            // Gestione speciale per Mezze Metro
+            const isMezzoMetroMargherita = pizza.nome === 'Mezzo Metro - Margherita';
+            const isMezzoMetroCustom = pizza.nome.includes('Mezzo Metro') && pizza.nome !== 'Mezzo Metro - Margherita';
+            
+            let sezioneTogliere = '';
+            let sezioneAggiungere = '';
+            
+            // Sezione ingredienti da togliere (solo se ci sono ingredienti E non è mezzo metro custom)
+            if (ingredientiPizza.length > 0 && !isMezzoMetroCustom) {
+                sezioneTogliere = `
+                    <div class="ingredienti-section">
+                        <h4>❌ Ingredienti da Togliere</h4>
+                        <div id="ingredienti-rimuovi">
+                            ${ingredientiPizza.map(ing => `
+                                <div class="ingrediente-item rimuovi" onclick="toggleIngrediente(this)">
+                                    ${ing}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Sezione ingredienti da aggiungere (non per Mezzo Metro Margherita)
+            if (!isMezzoMetroMargherita) {
+                sezioneAggiungere = `
+                    <div class="ingredienti-section">
+                        <h4>➕ Ingredienti da Aggiungere</h4>
+                        <div id="ingredienti-aggiungi">
+                            ${ingredientiExtra.map(ing => `
+                                <div class="ingrediente-item aggiungi" data-prezzo="${ing.prezzo}" onclick="toggleIngrediente(this)">
+                                    ${ing.nome} (+€${ing.prezzo.toFixed(2)})
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            contenuto.innerHTML = `
+                <h2 style="color: #e74c3c; margin-bottom: 20px;">🍕 ${pizza.nome}</h2>
+                <p style="color: #666; margin-bottom: 20px;">${pizza.descrizione}</p>
+                ${isMezzoMetroMargherita ? '<p style="color: #e74c3c; font-weight: bold; margin-bottom: 20px;">⚠️ Questa pizza non può essere personalizzata</p>' : ''}
+
+                ${sezioneTogliere}
+                ${sezioneAggiungere}
+
+                <div class="customizer-summary">
+                    <strong>Prezzo: € ${pizza.prezzo.toFixed(2)}</strong>
+                    <div id="extra-prezzo" style="color: #27ae60; margin-top: 5px;"></div>
+                </div>
+
+                <button class="btn btn-success" onclick="confermaPersonalizzazione(${pizza.id}, ${pizza.prezzo})">
+                    Aggiungi al Carrello
+                </button>
+            `;
+
+            modal.style.display = 'block';
+        }
+
+        function toggleIngrediente(element) {
+            element.classList.toggle('selected');
+            
+            // Aggiorna prezzo extra se è nella sezione aggiungi
+            if (element.classList.contains('aggiungi')) {
+                aggiornaExtraPrezzo();
+            }
+        }
+
+        function aggiornaExtraPrezzo() {
+            const selected = document.querySelectorAll('#ingredienti-aggiungi .ingrediente-item.selected');
+            let extraCosto = 0;
+            
+            selected.forEach(el => {
+                extraCosto += parseFloat(el.dataset.prezzo);
+            });
+
+            const extraDiv = document.getElementById('extra-prezzo');
+            if (extraCosto > 0) {
+                extraDiv.textContent = `Extra ingredienti: +€${extraCosto.toFixed(2)}`;
+            } else {
+                extraDiv.textContent = '';
+            }
+        }
+
+        function confermaPersonalizzazione(pizzaId, prezzoBase) {
+            const pizza = menu.find(m => m.id === pizzaId);
+            
+            // Raccogli ingredienti rimossi
+            const rimossi = Array.from(document.querySelectorAll('#ingredienti-rimuovi .ingrediente-item.selected'))
+                .map(el => el.textContent.trim());
+            
+            // Raccogli ingredienti aggiunti
+            const aggiunti = Array.from(document.querySelectorAll('#ingredienti-aggiungi .ingrediente-item.selected'))
+                .map(el => ({
+                    nome: el.textContent.trim().split('(')[0].trim(),
+                    prezzo: parseFloat(el.dataset.prezzo)
+                }));
+
+            // Calcola prezzo totale
+            const extraCosto = aggiunti.reduce((sum, ing) => sum + ing.prezzo, 0);
+            const prezzoTotale = prezzoBase + extraCosto;
+
+            // Crea descrizione personalizzata
+            let descrizione = pizza.descrizione;
+            if (rimossi.length > 0) {
+                descrizione += ` - SENZA: ${rimossi.join(', ')}`;
+            }
+            if (aggiunti.length > 0) {
+                descrizione += ` + ${aggiunti.map(a => a.nome).join(', ')}`;
+            }
+
+            // Aggiungi al carrello
+            const pizzaPersonalizzata = {
+                ...pizza,
+                descrizione: descrizione,
+                prezzo: prezzoTotale,
+                personalizzata: true,
+                rimossi: rimossi,
+                aggiunti: aggiunti.map(a => a.nome)
+            };
+
+            carrello.push(pizzaPersonalizzata);
+            aggiornaCarrello();
+            chiudiPersonalizza();
+
+            // Feedback visivo
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Aggiunta!';
+            btn.style.background = '#27ae60';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 500);
+        }
+
+        function chiudiPersonalizza() {
+            document.getElementById('modal-personalizza').style.display = 'none';
+        }
+
+        function componituaPizza() {
+            console.log('Apro modal componi pizza'); // Debug
+            
+            const modal = document.getElementById('modal-componi');
+            
+            if (!modal) {
+                console.error('Modal non trovato!');
+                alert('Errore: modal non trovato');
+                return;
+            }
+            
+            // Popola base
+            const baseContainer = document.getElementById('base-ingredienti');
+            baseContainer.innerHTML = ingredientiBase.map((ing, idx) => `
+                <div class="ingrediente-item" data-prezzo="${ing.prezzo}" onclick="selectBase(this, ${idx})">
+                    ${ing.nome} (€${ing.prezzo.toFixed(2)})
+                </div>
+            `).join('');
+
+            // Popola ingredienti custom divisi per prezzo
+            const custom1 = document.getElementById('custom-ingredienti-1');
+            const custom2 = document.getElementById('custom-ingredienti-2');
+            const custom3 = document.getElementById('custom-ingredienti-3');
+            const custom7 = document.getElementById('custom-ingredienti-7');
+            
+            const ing1_50 = ingredientiExtra.filter(i => i.prezzo === 1.50);
+            const ing2_50 = ingredientiExtra.filter(i => i.prezzo === 2.50);
+            const ing3_50 = ingredientiExtra.filter(i => i.prezzo === 3.50);
+            const ing7_00 = ingredientiExtra.filter(i => i.prezzo === 7.00);
+            
+            custom1.innerHTML = ing1_50.map(ing => `
+                <div class="ingrediente-item aggiungi" data-prezzo="${ing.prezzo}" onclick="toggleIngredienteCustom(this)">
+                    ${ing.nome} (+€${ing.prezzo.toFixed(2)})
+                </div>
+            `).join('');
+            
+            custom2.innerHTML = ing2_50.map(ing => `
+                <div class="ingrediente-item aggiungi" data-prezzo="${ing.prezzo}" onclick="toggleIngredienteCustom(this)">
+                    ${ing.nome} (+€${ing.prezzo.toFixed(2)})
+                </div>
+            `).join('');
+            
+            custom3.innerHTML = ing3_50.map(ing => `
+                <div class="ingrediente-item aggiungi" data-prezzo="${ing.prezzo}" onclick="toggleIngredienteCustom(this)">
+                    ${ing.nome} (+€${ing.prezzo.toFixed(2)})
+                </div>
+            `).join('');
+            
+            custom7.innerHTML = ing7_00.map(ing => `
+                <div class="ingrediente-item aggiungi" data-prezzo="${ing.prezzo}" onclick="toggleIngredienteCustom(this)">
+                    ${ing.nome} (+€${ing.prezzo.toFixed(2)})
+                </div>
+            `).join('');
+
+            // Seleziona prima base di default
+            setTimeout(() => {
+                const primaBase = baseContainer.querySelector('.ingrediente-item');
+                if (primaBase) selectBase(primaBase, 0);
+            }, 100);
+
+            modal.style.display = 'block';
+            console.log('Modal aperto'); // Debug
+        }
+
+        function selectBase(element, index) {
+            // Deseleziona tutte le basi
+            document.querySelectorAll('#base-ingredienti .ingrediente-item').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // Seleziona questa base
+            element.classList.add('selected');
+            
+            aggiornaCustomPrezzo();
+        }
+
+        function toggleIngredienteCustom(element) {
+            element.classList.toggle('selected');
+            aggiornaCustomPrezzo();
+        }
+
+        function aggiornaCustomPrezzo() {
+            const baseSelected = document.querySelector('#base-ingredienti .ingrediente-item.selected');
+            const ingredientiSelected = document.querySelectorAll('#custom-ingredienti-1 .ingrediente-item.selected, #custom-ingredienti-2 .ingrediente-item.selected, #custom-ingredienti-3 .ingrediente-item.selected, #custom-ingredienti-7 .ingrediente-item.selected');
+            
+            let prezzoTotale = 0;
+            
+            if (baseSelected) {
+                prezzoTotale += parseFloat(baseSelected.dataset.prezzo);
+            }
+            
+            ingredientiSelected.forEach(el => {
+                prezzoTotale += parseFloat(el.dataset.prezzo);
+            });
+
+            document.getElementById('prezzo-custom').textContent = prezzoTotale.toFixed(2);
+        }
+
+        function aggiungiPizzaCustom() {
+            const nome = document.getElementById('nome-custom').value.trim() || 'Pizza Personalizzata';
+            const baseSelected = document.querySelector('#base-ingredienti .ingrediente-item.selected');
+            const ingredientiSelected = Array.from(document.querySelectorAll('#custom-ingredienti-1 .ingrediente-item.selected, #custom-ingredienti-2 .ingrediente-item.selected, #custom-ingredienti-3 .ingrediente-item.selected, #custom-ingredienti-7 .ingrediente-item.selected'));
+            
+            if (!baseSelected) {
+                alert('Seleziona una base!');
+                return;
+            }
+
+            const prezzoTotale = parseFloat(document.getElementById('prezzo-custom').textContent);
+            
+            const baseNome = baseSelected.textContent.trim().split('(')[0].trim();
+            const ingredientiNomi = ingredientiSelected.map(el => el.textContent.trim().split('(')[0].trim());
+            
+            const descrizione = `Base: ${baseNome}${ingredientiNomi.length > 0 ? ' + ' + ingredientiNomi.join(', ') : ''}`;
+
+            const pizzaCustom = {
+                id: Date.now(),
+                nome: nome,
+                descrizione: descrizione,
+                prezzo: prezzoTotale,
+                categoria: 'Personalizzata',
+                personalizzata: true
+            };
+
+            carrello.push(pizzaCustom);
+            aggiornaCarrello();
+            chiudiComponi();
+
+            // Feedback
+            alert('Pizza aggiunta al carrello!');
+            
+            // Reset
+            document.getElementById('nome-custom').value = 'Pizza Personalizzata';
+        }
+
+        function chiudiComponi() {
+            document.getElementById('modal-componi').style.display = 'none';
+        }
+
+        function aggiungiAlCarrello(item) {
+            carrello.push({...item});
+            aggiornaCarrello();
+        }
+
+        function rimuoviDalCarrello(index) {
+            carrello.splice(index, 1);
+            aggiornaCarrello();
+            mostraCarrello();
+        }
+
+        function aggiornaCarrello() {
+            document.getElementById('carrello-count').textContent = carrello.length;
+        }
+
+        function apriCarrello() {
+            mostraCarrello();
+            document.getElementById('modal-carrello').style.display = 'block';
+        }
+
+        function chiudiCarrello() {
+            document.getElementById('modal-carrello').style.display = 'none';
+        }
+
+        function mostraCarrello() {
+            const contenuto = document.getElementById('carrello-contenuto');
+            
+            if (carrello.length === 0) {
+                contenuto.innerHTML = '<p style="text-align: center; color: #999;">Carrello vuoto</p>';
+                return;
+            }
+
+            const totaleBase = carrello.reduce((sum, item) => sum + item.prezzo, 0);
+            const tipoOrdine = document.getElementById('tipo-ordine') ? document.getElementById('tipo-ordine').value : 'ritiro';
+            const costoConsegna = tipoOrdine === 'consegna' ? 2 : 0;
+            const totale = totaleBase + costoConsegna;
+
+            contenuto.innerHTML = `
+                <div class="carrello-lista">
+                    ${carrello.map((item, index) => `
+                        <div class="carrello-item">
+                            <div>
+                                <div class="carrello-item-nome">${item.nome}</div>
+                                ${item.descrizione && item.personalizzata ? `<div style="font-size: 0.85em; color: #666; margin-top: 5px;">${item.descrizione}</div>` : ''}
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <span class="carrello-item-prezzo">€ ${item.prezzo.toFixed(2)}</span>
+                                <button class="btn-remove" onclick="rimuoviDalCarrello(${index})">✕</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                ${costoConsegna > 0 ? `
+                    <div style="padding: 10px; background: #f0f0f0; border-radius: 5px; margin: 10px 0;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Subtotale:</span>
+                            <span>€ ${totaleBase.toFixed(2)}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; color: #e74c3c;">
+                            <span>Costo consegna:</span>
+                            <span>€ ${costoConsegna.toFixed(2)}</span>
+                        </div>
+                    </div>
+                ` : ''}
+                <div class="totale">
+                    <strong>Totale: € ${totale.toFixed(2)}</strong>
+                </div>
+            `;
+        }
+
+        function aggiornaTipoOrdine() {
+            const tipoOrdine = document.getElementById('tipo-ordine').value;
+            const metodoPagamentoGroup = document.getElementById('metodo-pagamento-group');
+            const indirizzoInput = document.getElementById('cliente-indirizzo');
+            
+            if (tipoOrdine === 'consegna') {
+                metodoPagamentoGroup.style.display = 'block';
+                indirizzoInput.required = true;
+            } else {
+                metodoPagamentoGroup.style.display = 'none';
+                indirizzoInput.required = false;
+            }
+            
+            mostraCarrello();
+        }
+
+        async function inviaOrdine() {
+            const nome = document.getElementById('cliente-nome').value.trim();
+            const telefono = document.getElementById('cliente-telefono').value.trim();
+            const indirizzo = document.getElementById('cliente-indirizzo').value.trim();
+            const orario = document.getElementById('orario-richiesto').value;
+            const note = document.getElementById('note').value.trim();
+            const tipoOrdine = document.getElementById('tipo-ordine').value;
+            const metodoPagamento = document.getElementById('metodo-pagamento').value;
+
+            if (!nome || !telefono) {
+                alert('Inserisci nome e telefono!');
+                return;
+            }
+
+            if (tipoOrdine === 'consegna' && !indirizzo) {
+                alert('Inserisci l\'indirizzo per la consegna!');
+                return;
+            }
+
+            if (carrello.length === 0) {
+                alert('Il carrello è vuoto!');
+                return;
+            }
+
+            const totaleBase = carrello.reduce((sum, item) => sum + item.prezzo, 0);
+            const costoConsegna = tipoOrdine === 'consegna' ? 2 : 0;
+            const totale = totaleBase + costoConsegna;
+
+            try {
+                const response = await fetch('http://localhost:3000/api/ordini', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        cliente_nome: nome,
+                        cliente_telefono: telefono,
+                        cliente_indirizzo: indirizzo,
+                        items: carrello,
+                        totale: totale,
+                        orario_richiesto: orario,
+                        note: note,
+                        tipo_ordine: tipoOrdine,
+                        metodo_pagamento: tipoOrdine === 'consegna' ? metodoPagamento : null
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Reset
+                    carrello = [];
+                    aggiornaCarrello();
+                    
+                    document.getElementById('carrello-contenuto').innerHTML = `
+                        <div class="success-message">
+                            <h3>✅ Ordine Inviato!</h3>
+                            <p>Numero ordine: <strong>${result.ordine.numero_ordine}</strong></p>
+                            <p>Riceverai conferma a breve dalla pizzeria!</p>
+                        </div>
+                    `;
+
+                    // Reset form
+                    document.getElementById('cliente-nome').value = '';
+                    document.getElementById('cliente-telefono').value = '';
+                    document.getElementById('cliente-indirizzo').value = '';
+                    document.getElementById('orario-richiesto').value = '';
+                    document.getElementById('note').value = '';
+
+                    setTimeout(() => {
+                        chiudiCarrello();
+                    }, 3000);
+                } else {
+                    alert('Errore invio ordine: ' + result.error);
+                }
+            } catch (error) {
+                alert('Errore di rete: ' + error.message);
+            }
+        }
+
+        // Chiudi modal cliccando fuori
+        window.onclick = function(event) {
+            const modalCarrello = document.getElementById('modal-carrello');
+            const modalPersonalizza = document.getElementById('modal-personalizza');
+            const modalComponi = document.getElementById('modal-componi');
+            
+            if (event.target == modalCarrello) {
+                chiudiCarrello();
+            }
+            if (event.target == modalPersonalizza) {
+                chiudiPersonalizza();
+            }
+            if (event.target == modalComponi) {
+                chiudiComponi();
+            }
+        }
+
+        // Inizializza
+        caricaMenu();
+        
+        // Ascolta notifiche ordine accettato
+        socket.on('ordine-accettato', (data) => {
+            alert(`✅ ${data.messaggio}`);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Pizzeria - Gestione Ordini</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #0f3460;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        .ordini-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .ordine-card {
+            background: #16213e;
+            padding: 25px;
+            border-radius: 15px;
+            border: 3px solid #e74c3c;
+            position: relative;
+            animation: slideIn 0.5s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .ordine-card.accepted {
+            border-color: #27ae60;
+        }
+
+        .ordine-card.rejected {
+            border-color: #7f8c8d;
+            opacity: 0.6;
+        }
+
+        .ordine-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #0f3460;
+        }
+
+        .ordine-numero {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .ordine-timestamp {
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        .ordine-cliente {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .cliente-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .info-label {
+            color: #aaa;
+            font-size: 0.85em;
+        }
+
+        .info-value {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .ordine-items {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #1a1a2e;
+            margin-bottom: 8px;
+            border-radius: 8px;
+        }
+
+        .item-nome {
+            font-weight: bold;
+        }
+
+        .item-prezzo {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .ordine-totale {
+            text-align: right;
+            font-size: 1.5em;
+            color: #e74c3c;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .ordine-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .time-input {
+            grid-column: 1 / -1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #0f3460;
+            background: #1a1a2e;
+            color: white;
+            font-size: 1em;
+        }
+
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-accept {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-accept:hover {
+            background: #229954;
+            transform: scale(1.05);
+        }
+
+        .btn-reject {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+
+        .btn-print {
+            background: #3498db;
+            color: white;
+            grid-column: 1 / -1;
+        }
+
+        .btn-print:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #e74c3c;
+        }
+
+        .status-accepted {
+            background: #27ae60;
+        }
+
+        .status-rejected {
+            background: #7f8c8d;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #aaa;
+        }
+
+        .empty-state-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            z-index: 1000;
+            animation: slideInRight 0.5s;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .connection-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .connection-status.disconnected {
+            background: #e74c3c;
+        }
+
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+
+            .stats, .ordine-actions, .connection-status, header {
+                display: none !important;
+            }
+
+            .ordine-card {
+                page-break-inside: avoid;
+                border: 2px solid black;
+                background: white;
+            }
+
+            .ordine-cliente, .ordine-items {
+                background: #f8f9fa;
+                color: black;
+            }
+
+            .item {
+                background: white;
+                border: 1px solid #ddd;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .ordine-actions {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍕 Dashboard Pizzeria Mamma Mia</h1>
+            <p>Gestione Ordini in Tempo Reale</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="stat-pending">0</div>
+                <div class="stat-label">In Attesa</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-today">0</div>
+                <div class="stat-label">Oggi</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-revenue">€ 0</div>
+                <div class="stat-label">Incasso Oggi</div>
+            </div>
+        </div>
+
+        <h2 style="margin-bottom: 20px;">📋 Ordini in Attesa</h2>
+        <div class="ordini-container" id="ordini-container">
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>Nessun ordine in attesa</h3>
+                <p>Gli ordini appariranno qui in tempo reale</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="connection-status" id="connection-status">
+        🟢 Connesso
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io('http://localhost:3000');
+        let ordini = [];
+
+        // Connessione Socket.io
+        socket.on('connect', () => {
+            console.log('Connesso al server');
+            document.getElementById('connection-status').className = 'connection-status';
+            document.getElementById('connection-status').innerHTML = '🟢 Connesso';
+            socket.emit('pizzeria-connected');
+            caricaOrdini();
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnesso dal server');
+            document.getElementById('connection-status').className = 'connection-status disconnected';
+            document.getElementById('connection-status').innerHTML = '🔴 Disconnesso';
+        });
+
+        // Nuovo ordine ricevuto
+        socket.on('nuovo-ordine', (ordine) => {
+            mostraNotifica('🔔 Nuovo Ordine Ricevuto!', ordine.numero_ordine);
+            playSound();
+            caricaOrdini();
+        });
+
+        // Ordine aggiornato
+        socket.on('ordine-aggiornato', (ordine) => {
+            caricaOrdini();
+        });
+
+        // Carica ordini
+        async function caricaOrdini() {
+            try {
+                const response = await fetch('http://localhost:3000/api/ordini');
+                ordini = await response.json();
+                mostraOrdini();
+                aggiornaStats();
+            } catch (error) {
+                console.error('Errore caricamento ordini:', error);
+            }
+        }
+
+        function mostraOrdini() {
+            const container = document.getElementById('ordini-container');
+            const ordiniPending = ordini.filter(o => o.stato === 'pending');
+
+            if (ordiniPending.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>Nessun ordine in attesa</h3>
+                        <p>Gli ordini appariranno qui in tempo reale</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = ordiniPending.map(ordine => `
+                <div class="ordine-card" id="ordine-${ordine.id}">
+                    <div class="ordine-header">
+                        <div>
+                            <div class="ordine-numero">${ordine.numero_ordine}</div>
+                            <div class="ordine-timestamp">${formatTimestamp(ordine.timestamp)}</div>
+                        </div>
+                        <span class="status-badge status-${ordine.stato}">${getStatoLabel(ordine.stato)}</span>
+                    </div>
+
+                    <div class="ordine-cliente">
+                        <h3>👤 Dati Cliente</h3>
+                        <div class="cliente-info">
+                            <div>
+                                <div class="info-label">Nome</div>
+                                <div class="info-value">${ordine.cliente_nome}</div>
+                            </div>
+                            <div>
+                                <div class="info-label">Telefono</div>
+                                <div class="info-value">${ordine.cliente_telefono}</div>
+                            </div>
+                            ${ordine.cliente_indirizzo ? `
+                                <div>
+                                    <div class="info-label">Indirizzo</div>
+                                    <div class="info-value">${ordine.cliente_indirizzo}</div>
+                                </div>
+                            ` : ''}
+                            ${ordine.orario_richiesto ? `
+                                <div>
+                                    <div class="info-label">Orario Richiesto</div>
+                                    <div class="info-value">🕐 ${ordine.orario_richiesto}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        ${ordine.note ? `
+                            <div style="margin-top: 15px;">
+                                <div class="info-label">Note</div>
+                                <div class="info-value" style="color: #f39c12;">📝 ${ordine.note}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="ordine-items">
+                        <h3>🍕 Prodotti</h3>
+                        ${ordine.items.map(item => `
+                            <div class="item">
+                                <span class="item-nome">${item.nome}</span>
+                                <span class="item-prezzo">€ ${item.prezzo.toFixed(2)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="ordine-totale">
+                        TOTALE: € ${ordine.totale.toFixed(2)}
+                    </div>
+
+                    <div class="ordine-actions">
+                        <input type="time" class="time-input" id="orario-${ordine.id}" 
+                               value="${ordine.orario_richiesto || getCurrentTime()}"
+                               placeholder="Orario consegna">
+                        <button class="btn btn-accept" onclick="accettaOrdine(${ordine.id})">
+                            ✓ Accetta Ordine
+                        </button>
+                        <button class="btn btn-reject" onclick="rifiutaOrdine(${ordine.id})">
+                            ✗ Rifiuta
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function accettaOrdine(ordineId) {
+            const orarioInput = document.getElementById(`orario-${ordineId}`);
+            const orarioConfermato = orarioInput.value;
+
+            if (!orarioConfermato) {
+                alert('Inserisci un orario di consegna!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/ordini/${ordineId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        stato: 'accepted',
+                        orario_confermato: orarioConfermato
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    mostraNotifica('✅ Ordine Accettato!', 'Stampa in corso...');
+                    stampaOrdine(ordineId);
+                    setTimeout(() => caricaOrdini(), 500);
+                }
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        }
+
+        async function rifiutaOrdine(ordineId) {
+            if (!confirm('Sei sicuro di voler rifiutare questo ordine?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/ordini/${ordineId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        stato: 'rejected'
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    mostraNotifica('❌ Ordine Rifiutato', '');
+                    caricaOrdini();
+                }
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        }
+
+        function stampaOrdine(ordineId) {
+            const ordine = ordini.find(o => o.id === ordineId);
+            if (!ordine) return;
+
+            // Crea finestra di stampa
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Ordine ${ordine.numero_ordine}</title>
+                    <style>
+                        body { font-family: 'Courier New', monospace; padding: 20px; max-width: 80mm; }
+                        h1 { text-align: center; font-size: 1.5em; margin-bottom: 10px; }
+                        .section { margin: 15px 0; border-bottom: 1px dashed #000; padding-bottom: 10px; }
+                        .label { font-weight: bold; }
+                        .item { display: flex; justify-content: space-between; margin: 5px 0; }
+                        .totale { font-size: 1.3em; font-weight: bold; text-align: right; margin-top: 15px; }
+                        @media print {
+                            body { margin: 0; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>PIZZERIA MAMMA MIA</h1>
+                    <div class="section">
+                        <p><span class="label">Ordine:</span> ${ordine.numero_ordine}</p>
+                        <p><span class="label">Data:</span> ${formatTimestamp(ordine.timestamp)}</p>
+                    </div>
+                    <div class="section">
+                        <p><span class="label">Cliente:</span> ${ordine.cliente_nome}</p>
+                        <p><span class="label">Telefono:</span> ${ordine.cliente_telefono}</p>
+                        ${ordine.cliente_indirizzo ? `<p><span class="label">Indirizzo:</span> ${ordine.cliente_indirizzo}</p>` : ''}
+                        ${ordine.orario_confermato ? `<p><span class="label">Orario:</span> ${ordine.orario_confermato}</p>` : ''}
+                    </div>
+                    <div class="section">
+                        <p class="label">PRODOTTI:</p>
+                        ${ordine.items.map(item => `
+                            <div class="item">
+                                <span>${item.nome}</span>
+                                <span>€ ${item.prezzo.toFixed(2)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${ordine.note ? `
+                        <div class="section">
+                            <p><span class="label">Note:</span> ${ordine.note}</p>
+                        </div>
+                    ` : ''}
+                    <p class="totale">TOTALE: € ${ordine.totale.toFixed(2)}</p>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            printWindow.focus();
+            
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+        }
+
+        function aggiornaStats() {
+            const oggi = new Date().toDateString();
+            const ordiniOggi = ordini.filter(o => new Date(o.timestamp).toDateString() === oggi);
+            const ordiniPending = ordini.filter(o => o.stato === 'pending');
+            const incassoOggi = ordiniOggi
+                .filter(o => o.stato === 'accepted')
+                .reduce((sum, o) => sum + o.totale, 0);
+
+            document.getElementById('stat-pending').textContent = ordiniPending.length;
+            document.getElementById('stat-today').textContent = ordiniOggi.length;
+            document.getElementById('stat-revenue').textContent = `€ ${incassoOggi.toFixed(2)}`;
+        }
+
+        function mostraNotifica(titolo, messaggio) {
+            const notifica = document.createElement('div');
+            notifica.className = 'notification';
+            notifica.innerHTML = `<strong>${titolo}</strong><br>${messaggio}`;
+            document.body.appendChild(notifica);
+
+            setTimeout(() => {
+                notifica.remove();
+            }, 5000);
+        }
+
+        function playSound() {
+            // Beep audio
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString('it-IT', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function getStatoLabel(stato) {
+            const labels = {
+                'pending': 'In Attesa',
+                'accepted': 'Accettato',
+                'rejected': 'Rifiutato'
+            };
+            return labels[stato] || stato;
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        }
+
+        // Inizializza
+        caricaOrdini();
+        
+        // Aggiorna ogni 30 secondi
+        setInterval(caricaOrdini, 30000);
+    </script>
+</body>
+</html>
