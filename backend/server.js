@@ -24,6 +24,11 @@ app.use(bodyParser.json());
 app.use('/client', express.static(path.join(__dirname, '../client')));
 app.use('/pizzeria-dashboard', express.static(path.join(__dirname, '../pizzeria-dashboard')));
 
+// Servi service worker dalla root
+app.get('/service-worker.js', (req, res) => {
+  res.sendFile(path.join(__dirname, '../service-worker.js'));
+});
+
 // Servi dashboard mobile
 app.get('/mobile', (req, res) => {
   res.sendFile(path.join(__dirname, '../pizzeria-dashboard-mobile.html'));
