@@ -498,7 +498,7 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io('http://localhost:3000');
+        const socket = io(window.location.origin);
         let menu = [];
         let carrello = [];
 
@@ -630,7 +630,7 @@
         // Carica menu
         async function caricaMenu() {
             try {
-                const response = await fetch('http://localhost:3000/api/menu');
+                const response = await fetch(window.location.origin + '/api/menu');
                 menu = await response.json();
                 // Non mostrare subito il menu, aspetta che l'utente clicchi
             } catch (error) {
@@ -1089,7 +1089,7 @@
             const totale = totaleBase + costoConsegna;
 
             try {
-                const response = await fetch('http://localhost:3000/api/ordini', {
+                const response = await fetch(window.location.origin + '/api/ordini', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
